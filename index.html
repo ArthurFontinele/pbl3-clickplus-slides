@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#070712" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>PBL 3 · Correlação & Regressão Linear · ClickPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -299,6 +302,174 @@
   @media (max-width:900px){
     .slide{padding:60px 24px 90px}
     .corr-name{flex:0 0 140px}
+  }
+
+  /* ===== Laboratório interativo ===== */
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.96)}}
+  .lab-chart-wrap{
+    background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(6,182,212,0.04));
+    border:1px solid rgba(124,58,237,0.18);
+    cursor:grab;
+    user-select:none;-webkit-user-select:none;touch-action:none;
+  }
+  .lab-chart-wrap:active{cursor:grabbing}
+  .lab-hint{
+    position:absolute;top:14px;right:14px;z-index:5;
+    display:flex;align-items:center;gap:8px;
+    padding:6px 12px;border-radius:999px;
+    background:rgba(13,13,34,0.85);border:1px solid rgba(168,85,247,0.3);
+    backdrop-filter:blur(8px);
+    color:var(--text);font-size:11px;font-weight:600;letter-spacing:.06em;
+    pointer-events:none;
+    transition:opacity .3s;
+  }
+  .lab-hint.hidden{opacity:0}
+  .lab-hint-dot{
+    width:8px;height:8px;border-radius:50%;background:#22d3ee;
+    box-shadow:0 0 12px #22d3ee;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  .lab-eq-card{padding:16px}
+  .lab-eq{
+    background:linear-gradient(135deg,rgba(16,185,129,0.14),rgba(6,182,212,0.10));
+    border-color:rgba(16,185,129,0.3);
+    transition:background .3s, border-color .3s;
+  }
+  .lab-eq.flash{
+    background:linear-gradient(135deg,rgba(245,158,11,0.22),rgba(251,113,133,0.10));
+    border-color:rgba(245,158,11,0.5);
+  }
+  .lab-stats-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  }
+  .lab-stat{
+    background:var(--glass);border:1px solid var(--border);border-radius:14px;
+    padding:14px 16px;display:flex;flex-direction:column;gap:4px;
+    transition:transform .25s ease, border-color .25s ease;
+  }
+  .lab-stat.changed{
+    border-color:rgba(34,211,238,0.55);
+    transform:translateY(-2px);
+    box-shadow:0 0 0 4px rgba(34,211,238,0.08);
+  }
+  .lab-stat-label{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);
+    display:flex;align-items:baseline;gap:6px;
+  }
+  .lab-stat-label small{font-size:10px;text-transform:none;letter-spacing:0;opacity:.7;font-weight:500}
+  .lab-stat-value{
+    font-family:'Space Grotesk';font-weight:700;font-size:1.7rem;line-height:1;
+    background:linear-gradient(135deg,#fff,var(--cyan-2));-webkit-background-clip:text;background-clip:text;color:transparent;
+    font-variant-numeric:tabular-nums;
+  }
+  .lab-explainer{padding:14px 16px;background:var(--glass)}
+  .lab-explainer h4{font-size:.95rem}
+  .lab-reset-btn{
+    appearance:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 16px;border-radius:12px;
+    background:linear-gradient(135deg,rgba(124,58,237,0.18),rgba(6,182,212,0.12));
+    border:1px solid rgba(168,85,247,0.35);
+    color:var(--text);font-family:'Inter';font-size:13px;font-weight:600;
+    transition:all .2s ease;
+  }
+  .lab-reset-btn:hover{
+    background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(6,182,212,0.2));
+    transform:translateY(-2px);
+    box-shadow:0 8px 22px rgba(124,58,237,0.25);
+  }
+  .lab-reset-btn:active{transform:translateY(0)}
+  @media (max-width:768px){
+    .lab-grid{grid-template-columns:1fr !important}
+    .lab-chart-wrap{height:42vh !important;min-height:300px !important}
+    .lab-hint{font-size:10px;padding:5px 10px;top:10px;right:10px}
+    .lab-stats-grid{grid-template-columns:1fr 1fr}
+    .lab-stat-value{font-size:1.45rem}
+  }
+
+  /* ===== Tablets / mobile landscape (≤768px) ===== */
+  @media (max-width:768px){
+    html,body{overflow-x:hidden}
+    .topbar{top:12px;left:14px;right:14px;font-size:11px}
+    .topbar > div:last-child{display:none}
+    .brand-text{font-size:13px}
+    .footer-ribbon{display:none}
+    .slide{padding:56px 18px 110px}
+    h1{font-size:clamp(2rem,7vw,3rem)}
+    h2{font-size:clamp(1.4rem,5vw,2rem)}
+    h3{font-size:1.1rem}
+    .equation{font-size:clamp(1.1rem,4vw,1.7rem);padding:18px 18px}
+    .big-num{font-size:clamp(2.4rem,9vw,4rem)}
+    .stat-value{font-size:1.7rem}
+    .grid{gap:14px}
+    .grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr}
+    .slide.cover .lede{font-size:1rem}
+    .meta-row{flex-direction:column;gap:8px;font-size:12px}
+    .team{gap:8px}
+    .team-chip{padding:8px 12px;font-size:12.5px}
+    .team-chip .avatar{width:22px;height:22px;font-size:10px}
+    .card{padding:16px;border-radius:14px}
+    .card-icon{width:36px;height:36px;margin-bottom:10px}
+    .card-icon svg{width:18px;height:18px}
+    .key-insight{padding:14px;gap:12px}
+    .key-insight .ki-icon{width:32px;height:32px}
+    .end-card{padding:28px 18px;border-radius:18px}
+    /* Slide 8 e 10: gráficos viram coluna única */
+    .slide-inner > .grid[style*="1.4fr"],
+    .slide-inner > .grid[style*="1.2fr"]{grid-template-columns:1fr !important}
+    .chart-wrap{height:38vh !important;min-height:280px !important;padding:12px}
+    /* Tabela com scroll horizontal */
+    table{min-width:520px;font-size:12.5px}
+    th,td{padding:8px 10px}
+    tbody tr td:first-child,thead tr th:first-child,tfoot tr th:first-child{
+      position:sticky;left:0;background:rgba(13,13,34,0.95);backdrop-filter:blur(6px);
+    }
+    /* Barras de correlação reorganizadas */
+    .corr-row{flex-wrap:wrap;gap:8px;margin-bottom:18px}
+    .corr-name{flex:1 1 100%;font-size:13px}
+    .corr-bar{flex:1 1 65%;height:24px}
+    .corr-val{flex:0 0 auto;font-size:16px;min-width:64px}
+    /* Nav inferior compacta */
+    .nav{bottom:14px;padding:6px 10px;gap:4px}
+    .nav button{width:44px;height:44px}
+    .nav-counter{padding:0 8px;min-width:60px;font-size:12px}
+    .dots{display:none}
+    /* Esconder dica de teclado */
+    .slide.cover .slide-inner > div:last-child{display:none}
+    /* Glows e grid de fundo mais leves p/ perf */
+    body::after{background-size:40px 40px;opacity:.6}
+    .glow-1{width:240px;height:240px;filter:blur(60px)}
+    .glow-2{width:240px;height:240px;filter:blur(60px)}
+  }
+
+  /* ===== Mobile retrato (≤520px) ===== */
+  @media (max-width:520px){
+    .slide{padding:50px 14px 110px}
+    h1{font-size:clamp(1.85rem,8vw,2.5rem);line-height:1.1}
+    .eyebrow{font-size:11px;padding:5px 11px;letter-spacing:.14em}
+    .stat-value{font-size:1.5rem}
+    .big-num{font-size:clamp(2rem,10vw,3.2rem)}
+    .equation{font-size:clamp(.95rem,4.4vw,1.4rem);padding:14px 14px;line-height:1.4}
+    .card{padding:14px}
+    ul.checklist li{padding:11px 12px;gap:10px}
+    ul.checklist li span{font-size:13px}
+    .corr-bar{height:22px}
+    .corr-val{font-size:14px}
+    .conc{padding:14px}
+    .conc h4 .num{width:24px;height:24px;font-size:12px}
+    .chart-wrap{height:36vh !important;min-height:260px !important}
+    .pill{font-size:10px;padding:3px 8px}
+    .key-insight p{font-size:13px}
+  }
+
+  /* ===== Mobile paisagem baixa (≤560px altura) ===== */
+  @media (max-height:560px) and (orientation:landscape){
+    .slide{padding:44px 28px 78px;justify-content:flex-start}
+    h1{font-size:1.9rem}
+    h2{font-size:1.3rem;margin:10px 0 14px !important}
+    .nav{bottom:8px}
+    .topbar{top:8px}
+    .chart-wrap{height:55vh !important;min-height:200px !important}
   }
 </style>
 </head>
@@ -598,6 +769,70 @@
             <span class="pill pill-violet">Coeficiente de determinação</span>
             <div class="stat" style="margin-top:10px"><span class="stat-label">R²</span><span class="stat-value" style="font-size:3rem">0,972</span><span class="stat-sub">≈ 97% da variação das vendas é explicada pelo investimento</span></div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8B — LABORATÓRIO INTERATIVO ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="eyebrow"><span class="eyebrow-dot"></span>7B · Laboratório interativo</span>
+        <span class="pill pill-amber" style="animation:pulse 2.4s ease-in-out infinite">⚡ Ao vivo</span>
+      </div>
+      <h2 style="margin:14px 0 6px">Arraste os pontos e veja a <span class="gradient-text">regressão</span> mudar</h2>
+      <p style="margin-bottom:18px">Cada ponto azul é um mês. <b style="color:var(--text)">Clique e arraste</b> qualquer ponto para reposicioná-lo — os coeficientes β₀, β₁, <i>r</i> e R² recalculam em tempo real, e a reta de regressão se ajusta com o método dos <b style="color:var(--text)">mínimos quadrados</b>. Mostra que o modelo <i>responde aos dados</i> — não é fórmula mágica.</p>
+
+      <div class="grid lab-grid" style="grid-template-columns:1.5fr 1fr;align-items:stretch;gap:18px">
+        <div class="chart-wrap lab-chart-wrap" style="height:58vh;min-height:420px;position:relative">
+          <canvas id="lab-scatter"></canvas>
+          <div class="lab-hint" id="lab-hint">
+            <span class="lab-hint-dot"></span>
+            <span>Toque/clique e arraste um ponto</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+          <div class="card lab-eq-card">
+            <span class="pill pill-emerald">Reta calculada · ao vivo</span>
+            <div class="equation lab-eq" id="lab-eq" style="margin-top:12px;font-size:clamp(1rem,1.8vw,1.45rem);padding:16px">
+              ŷ = 8,37 + 3,93 · x
+            </div>
+          </div>
+
+          <div class="lab-stats-grid">
+            <div class="lab-stat" id="lab-stat-b0">
+              <span class="lab-stat-label">β₀ <small>intercepto</small></span>
+              <span class="lab-stat-value" id="lab-b0">8,37</span>
+            </div>
+            <div class="lab-stat" id="lab-stat-b1">
+              <span class="lab-stat-label">β₁ <small>inclinação</small></span>
+              <span class="lab-stat-value" id="lab-b1">3,93</span>
+            </div>
+            <div class="lab-stat" id="lab-stat-r">
+              <span class="lab-stat-label">r <small>Pearson</small></span>
+              <span class="lab-stat-value" id="lab-r">0,9857</span>
+            </div>
+            <div class="lab-stat" id="lab-stat-r2">
+              <span class="lab-stat-label">R² <small>determinação</small></span>
+              <span class="lab-stat-value" id="lab-r2">0,9716</span>
+            </div>
+          </div>
+
+          <div class="card lab-explainer">
+            <h4 style="margin-bottom:6px;display:flex;align-items:center;gap:8px"><span style="font-size:1.1em">💡</span>O que observar</h4>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-dim);line-height:1.5">
+              <li>• Mover um ponto para <b style="color:var(--text)">longe da nuvem</b> derruba o R² — é um <i>outlier</i>.</li>
+              <li>• Aumentar todos os Y juntos sobe β₀ e mantém β₁.</li>
+              <li>• Inverter a tendência (alto-X, baixo-Y) <b style="color:var(--rose)">vira r negativo</b>.</li>
+            </ul>
+          </div>
+
+          <button id="lab-reset" class="lab-reset-btn">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+            Restaurar pontos originais
+          </button>
         </div>
       </div>
     </div>
@@ -925,7 +1160,7 @@ function toggleFs(){
 }
 
 /* trigger animations for charts/bars when slide enters */
-let scatterChart=null, forecastChart=null;
+let scatterChart=null, forecastChart=null, labChart=null;
 function triggerInSlide(i){
   // Correlation bars (slide 7 — index 6)
   if(i===6){
@@ -949,8 +1184,10 @@ function triggerInSlide(i){
       options:chartOpts({xTitle:'Investimento (R$ mil)', yTitle:'Vendas (R$ mil)'})
     });
   }
-  // Forecast bar chart (slide 10 — index 9)
-  if(i===9 && !forecastChart){
+  // Lab interativo (slide 8B — index 8)
+  if(i===8 && !labChart){ initLab(); }
+  // Forecast bar chart (slide 10 — index 10)
+  if(i===10 && !forecastChart){
     const xs = [5,8,11,13,15,18,20,22];
     const ys = xs.map(x=>+(8.37+3.93*x).toFixed(1));
     const ctx = document.getElementById('forecast').getContext('2d');
@@ -996,6 +1233,167 @@ function chartOpts({xTitle,yTitle,leg=true}){
     }
   };
 }
+
+/* ====== Laboratório interativo (slide 8B) ====== */
+let _labDragIdx = null;
+function initLab(){
+  const labPoints   = data.map(d=>({x:d.inv, y:d.v}));
+  const labOriginal = data.map(d=>({x:d.inv, y:d.v}));
+
+  const X_MIN=2, X_MAX=26, Y_MIN=0, Y_MAX=120;
+
+  function calcStats(pts){
+    const n = pts.length;
+    const mx = pts.reduce((s,p)=>s+p.x,0)/n;
+    const my = pts.reduce((s,p)=>s+p.y,0)/n;
+    let sxx=0, syy=0, sxy=0;
+    pts.forEach(p=>{ sxx+=(p.x-mx)**2; syy+=(p.y-my)**2; sxy+=(p.x-mx)*(p.y-my); });
+    const b1 = sxx>1e-9 ? sxy/sxx : 0;
+    const b0 = my - b1*mx;
+    const denom = Math.sqrt(sxx*syy);
+    const r = denom>1e-9 ? sxy/denom : 0;
+    return {b0, b1, r, r2:r*r};
+  }
+
+  let labStats = calcStats(labPoints);
+  let prevStats = {...labStats};
+
+  const ctx = document.getElementById('lab-scatter').getContext('2d');
+  labChart = new Chart(ctx,{
+    type:'scatter',
+    data:{datasets:[
+      {label:'Pontos · arraste',data:labPoints,backgroundColor:'rgba(34,211,238,0.9)',borderColor:'#fff',pointRadius:9,pointHoverRadius:13,pointBorderWidth:2,hoverBorderWidth:3},
+      {label:'Reta de regressão (ao vivo)',data:[{x:X_MIN,y:labStats.b0+labStats.b1*X_MIN},{x:X_MAX,y:labStats.b0+labStats.b1*X_MAX}],type:'line',showLine:true,borderColor:'#10b981',backgroundColor:'#10b981',borderWidth:3,pointRadius:0,fill:false,borderDash:[6,5]}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{display:true,position:'top',labels:{color:'#cbd5e1',usePointStyle:true,boxWidth:8,font:{family:'Inter',size:12}}},
+        tooltip:{
+          backgroundColor:'rgba(10,10,28,0.95)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+          titleColor:'#fff',bodyColor:'#cbd5e1',padding:10,cornerRadius:10,
+          callbacks:{label:(c)=>`Mês ${c.dataIndex+1}: R$ ${c.parsed.x.toFixed(1)} mil → R$ ${c.parsed.y.toFixed(1)} mil`}
+        }
+      },
+      scales:{
+        x:{min:X_MIN,max:X_MAX,title:{display:true,text:'Investimento (R$ mil)',color:'#94a3b8',font:{family:'Space Grotesk',size:13,weight:'600'}},ticks:{color:'#94a3b8',font:{family:'Inter'}},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{min:Y_MIN,max:Y_MAX,title:{display:true,text:'Vendas (R$ mil)',color:'#94a3b8',font:{family:'Space Grotesk',size:13,weight:'600'}},ticks:{color:'#94a3b8',font:{family:'Inter'}},grid:{color:'rgba(255,255,255,0.06)'}}
+      }
+    }
+  });
+
+  function flashStat(id, oldV, newV){
+    if(Math.abs(oldV-newV) < 1e-4) return;
+    const el = document.getElementById('lab-stat-'+id);
+    if(!el) return;
+    el.classList.add('changed');
+    clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('changed'),420);
+  }
+
+  function updateLab(){
+    labStats = calcStats(labPoints);
+    labChart.data.datasets[1].data = [
+      {x:X_MIN, y:labStats.b0 + labStats.b1*X_MIN},
+      {x:X_MAX, y:labStats.b0 + labStats.b1*X_MAX}
+    ];
+    labChart.update('none');
+    flashStat('b0', prevStats.b0, labStats.b0);
+    flashStat('b1', prevStats.b1, labStats.b1);
+    flashStat('r',  prevStats.r,  labStats.r);
+    flashStat('r2', prevStats.r2, labStats.r2);
+    document.getElementById('lab-b0').textContent = fmt(labStats.b0,2);
+    document.getElementById('lab-b1').textContent = fmt(labStats.b1,2);
+    document.getElementById('lab-r').textContent  = fmt(labStats.r,4);
+    document.getElementById('lab-r2').textContent = fmt(labStats.r2,4);
+    const sign = labStats.b1 >= 0 ? '+' : '−';
+    document.getElementById('lab-eq').innerHTML =
+      `ŷ = ${fmt(labStats.b0,2)} ${sign} ${fmt(Math.abs(labStats.b1),2)} · x`;
+    prevStats = {...labStats};
+  }
+
+  /* Drag handlers (mouse + touch) */
+  const canvas = labChart.canvas;
+
+  function findPointAt(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    const px = clientX - rect.left;
+    const py = clientY - rect.top;
+    const meta = labChart.getDatasetMeta(0);
+    let best = -1, bestD = 28;
+    meta.data.forEach((el,i)=>{
+      const dx = el.x - px, dy = el.y - py;
+      const d = Math.hypot(dx,dy);
+      if(d < bestD){ bestD = d; best = i; }
+    });
+    return best;
+  }
+
+  function startDrag(e){
+    const pt = e.touches ? e.touches[0] : e;
+    const idx = findPointAt(pt.clientX, pt.clientY);
+    if(idx >= 0){
+      _labDragIdx = idx;
+      canvas.style.cursor = 'grabbing';
+      const hint = document.getElementById('lab-hint');
+      hint?.classList.add('hidden');
+      e.preventDefault();
+    }
+  }
+  function moveDrag(e){
+    if(_labDragIdx === null) return;
+    const pt = e.touches ? e.touches[0] : e;
+    const rect = canvas.getBoundingClientRect();
+    const px = pt.clientX - rect.left;
+    const py = pt.clientY - rect.top;
+    let x = labChart.scales.x.getValueForPixel(px);
+    let y = labChart.scales.y.getValueForPixel(py);
+    x = Math.max(X_MIN, Math.min(X_MAX, x));
+    y = Math.max(Y_MIN, Math.min(Y_MAX, y));
+    labPoints[_labDragIdx] = {x, y};
+    updateLab();
+    e.preventDefault();
+  }
+  function endDrag(){
+    if(_labDragIdx !== null){
+      _labDragIdx = null;
+      canvas.style.cursor = 'grab';
+    }
+  }
+
+  canvas.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('mouseup', endDrag);
+  canvas.addEventListener('touchstart', startDrag, {passive:false});
+  canvas.addEventListener('touchmove',  moveDrag,  {passive:false});
+  canvas.addEventListener('touchend',   endDrag);
+
+  document.getElementById('lab-reset').addEventListener('click',()=>{
+    labOriginal.forEach((p,i)=>{ labPoints[i] = {x:p.x, y:p.y}; });
+    updateLab();
+    document.getElementById('lab-hint')?.classList.remove('hidden');
+  });
+
+  updateLab();
+}
+
+/* ====== Touch swipe entre slides ====== */
+let _swStartX=0,_swStartY=0,_swStartT=0,_swActive=false;
+const _deck = document.getElementById('deck');
+_deck.addEventListener('touchstart',e=>{
+  if(_labDragIdx !== null) return;
+  if(e.touches.length>1) return;
+  const t = e.touches[0];
+  _swStartX = t.clientX; _swStartY = t.clientY; _swStartT = Date.now(); _swActive = true;
+},{passive:true});
+_deck.addEventListener('touchend',e=>{
+  if(!_swActive) return; _swActive = false;
+  if(_labDragIdx !== null) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - _swStartX, dy = t.clientY - _swStartY, dt = Date.now() - _swStartT;
+  if(Math.abs(dx) > 55 && Math.abs(dy) < 60 && dt < 700){
+    if(dx < 0) go(idx+1); else go(idx-1);
+  }
+},{passive:true});
 
 /* init */
 go(0);
