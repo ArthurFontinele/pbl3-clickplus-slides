@@ -782,14 +782,14 @@
         <span class="pill pill-amber" style="animation:pulse 2.4s ease-in-out infinite">⚡ Ao vivo</span>
       </div>
       <h2 style="margin:14px 0 6px">Arraste os pontos e veja a <span class="gradient-text">regressão</span> mudar</h2>
-      <p style="margin-bottom:18px">Cada ponto azul é um mês. <b style="color:var(--text)">Clique e arraste</b> qualquer ponto para reposicioná-lo — os coeficientes β₀, β₁, <i>r</i> e R² recalculam em tempo real, e a reta de regressão se ajusta com o método dos <b style="color:var(--text)">mínimos quadrados</b>. Mostra que o modelo <i>responde aos dados</i> — não é fórmula mágica.</p>
+      <p style="margin-bottom:18px">Cada ponto azul é um mês. <b style="color:var(--text)">Clique/toque e arraste verticalmente</b> qualquer ponto para alterar suas <b style="color:var(--text)">vendas</b> — o investimento (eixo X) fica fixo, pois é um dado real do mês. Os coeficientes β₀, β₁, <i>r</i> e R² recalculam em tempo real pelo método dos <b style="color:var(--text)">mínimos quadrados</b>, mostrando que o modelo <i>responde aos dados</i>.</p>
 
       <div class="grid lab-grid" style="grid-template-columns:1.5fr 1fr;align-items:stretch;gap:18px">
         <div class="chart-wrap lab-chart-wrap" style="height:58vh;min-height:420px;position:relative">
           <canvas id="lab-scatter"></canvas>
           <div class="lab-hint" id="lab-hint">
             <span class="lab-hint-dot"></span>
-            <span>Toque/clique e arraste um ponto</span>
+            <span>Arraste um ponto ↑↓ (vertical)</span>
           </div>
         </div>
 
@@ -823,9 +823,9 @@
           <div class="card lab-explainer">
             <h4 style="margin-bottom:6px;display:flex;align-items:center;gap:8px"><span style="font-size:1.1em">💡</span>O que observar</h4>
             <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-dim);line-height:1.5">
-              <li>• Mover um ponto para <b style="color:var(--text)">longe da nuvem</b> derruba o R² — é um <i>outlier</i>.</li>
-              <li>• Aumentar todos os Y juntos sobe β₀ e mantém β₁.</li>
-              <li>• Inverter a tendência (alto-X, baixo-Y) <b style="color:var(--rose)">vira r negativo</b>.</li>
+              <li>• Puxar um ponto para <b style="color:var(--text)">longe da reta</b> derruba o R² — é um <i>outlier</i>.</li>
+              <li>• Subir as vendas dos meses de <b style="color:var(--text)">alto investimento</b> aumenta β₁ (inclinação).</li>
+              <li>• Inverter a tendência (alto X com baixo Y) <b style="color:var(--rose)">vira <i>r</i> negativo</b>.</li>
             </ul>
           </div>
 
@@ -1339,17 +1339,17 @@ function initLab(){
       e.preventDefault();
     }
   }
+  const Y_DRAG_MIN = 5, Y_DRAG_MAX = 115; // limites de arrasto seguros
   function moveDrag(e){
     if(_labDragIdx === null) return;
     const pt = e.touches ? e.touches[0] : e;
     const rect = canvas.getBoundingClientRect();
-    const px = pt.clientX - rect.left;
     const py = pt.clientY - rect.top;
-    let x = labChart.scales.x.getValueForPixel(px);
     let y = labChart.scales.y.getValueForPixel(py);
-    x = Math.max(X_MIN, Math.min(X_MAX, x));
-    y = Math.max(Y_MIN, Math.min(Y_MAX, y));
-    labPoints[_labDragIdx] = {x, y};
+    if(!isFinite(y)) return;
+    y = Math.max(Y_DRAG_MIN, Math.min(Y_DRAG_MAX, y));
+    // X fica TRAVADO no valor original do mês — só Y se move
+    labPoints[_labDragIdx].y = y;
     updateLab();
     e.preventDefault();
   }
