@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PBL 3 · Correlação & Regressão Linear · ClickPlus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg-0:#070712;
+    --bg-1:#0d0d22;
+    --violet:#7c3aed;
+    --violet-2:#a855f7;
+    --cyan:#06b6d4;
+    --cyan-2:#22d3ee;
+    --amber:#f59e0b;
+    --rose:#fb7185;
+    --emerald:#10b981;
+    --text:#e5e7f1;
+    --text-dim:#9ca3b8;
+    --border:rgba(255,255,255,0.08);
+    --glass:rgba(255,255,255,0.04);
+    --glass-2:rgba(255,255,255,0.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;width:100%;overflow:hidden;background:var(--bg-0);color:var(--text);font-family:'Inter',system-ui,sans-serif}
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(124,58,237,0.25), transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(6,182,212,0.22), transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(245,158,11,0.10), transparent 50%),
+      linear-gradient(180deg,#070712 0%,#0a0a1c 100%);
+    pointer-events:none;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:1;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+    background-size:60px 60px;
+    mask-image:radial-gradient(ellipse at center,black 30%, transparent 80%);
+  }
+
+  .progress{
+    position:fixed;top:0;left:0;height:3px;width:0%;z-index:50;
+    background:linear-gradient(90deg,var(--violet),var(--cyan),var(--amber));
+    transition:width .4s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 0 12px rgba(124,58,237,0.6);
+  }
+
+  .topbar{
+    position:fixed;top:18px;left:24px;right:24px;z-index:30;
+    display:flex;justify-content:space-between;align-items:center;
+    color:var(--text-dim);font-size:13px;font-weight:500;letter-spacing:0.04em;
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-logo{
+    width:28px;height:28px;border-radius:8px;
+    background:conic-gradient(from 90deg,var(--violet),var(--cyan),var(--amber),var(--violet));
+    box-shadow:0 0 18px rgba(124,58,237,0.55);
+    position:relative;
+  }
+  .brand-logo::after{
+    content:"";position:absolute;inset:5px;border-radius:5px;background:var(--bg-0);
+  }
+  .brand-text{color:var(--text);font-family:'Space Grotesk';font-weight:600}
+
+  .deck{
+    position:relative;z-index:5;width:100%;height:100%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .slide{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;justify-content:center;align-items:stretch;
+    padding:80px 80px 100px;
+    opacity:0;transform:translateX(40px);
+    transition:opacity .45s ease, transform .55s cubic-bezier(.4,0,.2,1);
+    pointer-events:none;
+    overflow:auto;
+  }
+  .slide.active{opacity:1;transform:translateX(0);pointer-events:auto}
+  .slide.prev{transform:translateX(-40px)}
+  .slide-inner{max-width:1280px;margin:0 auto;width:100%}
+
+  /* Stagger animation for elements inside active slide */
+  .slide.active .stagger > *{
+    animation: fadeUp .6s cubic-bezier(.2,.7,.2,1) backwards;
+  }
+  .slide.active .stagger > *:nth-child(1){animation-delay:.10s}
+  .slide.active .stagger > *:nth-child(2){animation-delay:.20s}
+  .slide.active .stagger > *:nth-child(3){animation-delay:.30s}
+  .slide.active .stagger > *:nth-child(4){animation-delay:.40s}
+  .slide.active .stagger > *:nth-child(5){animation-delay:.50s}
+  .slide.active .stagger > *:nth-child(6){animation-delay:.60s}
+  .slide.active .stagger > *:nth-child(7){animation-delay:.70s}
+  .slide.active .stagger > *:nth-child(8){animation-delay:.80s}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;letter-spacing:-0.01em;margin:0}
+  h1{font-size:clamp(2.4rem,5vw,4.4rem);font-weight:700;line-height:1.05}
+  h2{font-size:clamp(1.6rem,3vw,2.6rem);font-weight:700;line-height:1.15}
+  h3{font-size:1.25rem;font-weight:600}
+  p{line-height:1.7;color:var(--text-dim);margin:0}
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px;border-radius:999px;
+    background:var(--glass-2);border:1px solid var(--border);
+    color:var(--text);font-size:12px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;
+  }
+  .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+
+  .gradient-text{
+    background:linear-gradient(135deg,var(--violet-2) 0%,var(--cyan-2) 60%,var(--amber) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  .card{
+    background:var(--glass);border:1px solid var(--border);
+    border-radius:18px;padding:22px;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:transform .3s ease, border-color .3s ease, background .3s ease;
+  }
+  .card:hover{transform:translateY(-4px);border-color:rgba(168,85,247,0.35);background:var(--glass-2)}
+  .card-icon{
+    width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(6,182,212,0.2));
+    border:1px solid var(--border);margin-bottom:14px;
+  }
+  .card-icon svg{width:22px;height:22px;color:var(--cyan-2)}
+
+  .grid{display:grid;gap:18px}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  .grid-5{grid-template-columns:repeat(5,1fr)}
+  @media (max-width:1100px){.grid-3,.grid-4,.grid-5{grid-template-columns:repeat(2,1fr)}}
+
+  .stat{display:flex;flex-direction:column;gap:6px}
+  .stat-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim)}
+  .stat-value{font-family:'Space Grotesk';font-weight:700;font-size:2.2rem;line-height:1;
+    background:linear-gradient(135deg,#fff,var(--cyan-2));-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .stat-sub{font-size:13px;color:var(--text-dim)}
+
+  .nav{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:40;
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;border-radius:999px;
+    background:rgba(10,10,28,0.72);border:1px solid var(--border);backdrop-filter:blur(14px);
+  }
+  .nav button{
+    appearance:none;background:transparent;border:1px solid transparent;color:var(--text);
+    width:38px;height:38px;border-radius:999px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:all .2s ease;
+  }
+  .nav button:hover{background:var(--glass-2);border-color:var(--border)}
+  .nav button svg{width:18px;height:18px}
+  .nav-counter{
+    color:var(--text-dim);font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;padding:0 12px;min-width:74px;text-align:center;
+  }
+  .nav-counter b{color:var(--text)}
+  .dots{display:flex;gap:5px;align-items:center;padding:0 6px;max-width:170px;flex-wrap:wrap}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.18);cursor:pointer;transition:all .2s}
+  .dot.active{background:linear-gradient(135deg,var(--violet-2),var(--cyan-2));transform:scale(1.4);box-shadow:0 0 8px var(--violet)}
+
+  /* Slide 1 — Cover */
+  .cover{display:flex;flex-direction:column;justify-content:center;height:100%}
+  .cover .eyebrow{margin-bottom:22px}
+  .cover h1{margin-bottom:18px}
+  .cover .lede{max-width:720px;font-size:1.15rem;color:var(--text-dim);margin-bottom:42px}
+  .team{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px}
+  .team-chip{
+    padding:10px 16px;border-radius:999px;background:var(--glass);border:1px solid var(--border);
+    font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;
+  }
+  .team-chip .avatar{
+    width:24px;height:24px;border-radius:50%;
+    background:linear-gradient(135deg,var(--violet),var(--cyan));
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;
+  }
+  .meta-row{display:flex;gap:32px;color:var(--text-dim);font-size:13px;letter-spacing:.04em}
+  .meta-row span b{color:var(--text);font-weight:600}
+
+  /* Big number focus */
+  .big-num{
+    font-family:'Space Grotesk';font-weight:700;font-size:clamp(3rem,7vw,6rem);line-height:1;
+    background:linear-gradient(135deg,var(--violet-2),var(--cyan-2),var(--amber));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+  th,td{padding:10px 14px;text-align:right;border-bottom:1px solid var(--border)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--text-dim);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;background:var(--glass)}
+  tbody tr{transition:background .2s}
+  tbody tr:hover{background:var(--glass)}
+  td b{color:var(--cyan-2)}
+
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.06em}
+  .pill-violet{background:rgba(124,58,237,0.14);color:#c4b5fd;border:1px solid rgba(124,58,237,0.3)}
+  .pill-cyan{background:rgba(6,182,212,0.14);color:#67e8f9;border:1px solid rgba(6,182,212,0.3)}
+  .pill-amber{background:rgba(245,158,11,0.14);color:#fcd34d;border:1px solid rgba(245,158,11,0.3)}
+  .pill-rose{background:rgba(251,113,133,0.14);color:#fda4af;border:1px solid rgba(251,113,133,0.3)}
+  .pill-emerald{background:rgba(16,185,129,0.14);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3)}
+
+  .chart-wrap{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:18px;height:100%}
+  .chart-wrap canvas{max-width:100%}
+
+  .equation{
+    font-family:'Space Grotesk';font-size:clamp(1.6rem,2.6vw,2.4rem);font-weight:600;
+    padding:22px 28px;border-radius:16px;
+    background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(6,182,212,0.12));
+    border:1px solid rgba(168,85,247,0.3);
+    text-align:center;letter-spacing:.01em;
+  }
+  .equation small{font-size:.6em;color:var(--text-dim);font-weight:400}
+
+  ul.checklist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+  ul.checklist li{
+    display:flex;gap:14px;align-items:flex-start;padding:14px 16px;
+    background:var(--glass);border:1px solid var(--border);border-radius:14px;
+  }
+  ul.checklist li .check{
+    flex-shrink:0;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--emerald),var(--cyan));color:#031;font-weight:700;font-size:13px;
+  }
+  ul.checklist li .warn{
+    flex-shrink:0;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--amber),var(--rose));color:#3a1d00;font-weight:700;font-size:13px;
+  }
+  ul.checklist li b{color:var(--text)}
+  ul.checklist li span{color:var(--text-dim);font-size:14px;line-height:1.55}
+
+  .key-insight{
+    display:flex;gap:16px;padding:18px 22px;border-radius:14px;
+    background:linear-gradient(135deg,rgba(245,158,11,0.10),rgba(251,113,133,0.06));
+    border:1px solid rgba(245,158,11,0.28);
+  }
+  .key-insight .ki-icon{
+    flex-shrink:0;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:rgba(245,158,11,0.16);color:#fcd34d;
+  }
+  .key-insight h4{margin-bottom:4px}
+  .key-insight p{color:var(--text);font-size:14px}
+
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--text-dim);align-items:center;flex-wrap:wrap}
+  .legend-item{display:flex;gap:6px;align-items:center}
+  .legend-swatch{width:10px;height:10px;border-radius:3px}
+
+  /* Vertical bar — correlation strength */
+  .corr-row{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .corr-name{flex:0 0 220px;font-size:14px;color:var(--text);font-weight:500}
+  .corr-bar{flex:1;height:30px;background:var(--glass);border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative}
+  .corr-bar-fill{
+    height:100%;border-radius:8px;
+    background:linear-gradient(90deg,var(--violet),var(--cyan-2),var(--emerald));
+    transition:width 1.2s cubic-bezier(.2,.7,.2,1);
+    box-shadow:inset 0 0 12px rgba(255,255,255,0.15);
+  }
+  .corr-val{flex:0 0 90px;font-family:'Space Grotesk';font-weight:700;color:var(--cyan-2);text-align:right;font-size:18px}
+
+  .footer-ribbon{
+    position:fixed;bottom:0;left:0;right:0;height:34px;z-index:5;display:flex;align-items:center;justify-content:center;gap:18px;
+    color:var(--text-dim);font-size:11px;letter-spacing:.18em;text-transform:uppercase;pointer-events:none;
+  }
+  .footer-ribbon b{color:var(--text);font-weight:600;letter-spacing:.06em;text-transform:none}
+
+  .glow{position:absolute;border-radius:50%;filter:blur(80px);opacity:.6;pointer-events:none;z-index:-1}
+  .glow-1{width:400px;height:400px;background:var(--violet);top:-100px;right:-100px;animation:floaty 14s ease-in-out infinite}
+  .glow-2{width:380px;height:380px;background:var(--cyan);bottom:-120px;left:-100px;animation:floaty 16s ease-in-out infinite reverse}
+  @keyframes floaty{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-30px) scale(1.08)}}
+
+  .kbd{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--glass-2);border:1px solid var(--border);font-size:11px;font-family:'Space Grotesk';color:var(--text)}
+
+  .end-card{
+    text-align:center;padding:52px;border-radius:24px;
+    background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(6,182,212,0.10));
+    border:1px solid var(--border);
+  }
+
+  /* Conclusion check */
+  .conc{
+    padding:18px;border-radius:14px;background:var(--glass);border:1px solid var(--border);
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .conc h4{display:flex;align-items:center;gap:10px}
+  .conc h4 .num{
+    width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--violet),var(--cyan));
+    display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:700;
+  }
+  .conc p{font-size:14px}
+
+  @media (max-width:900px){
+    .slide{padding:60px 24px 90px}
+    .corr-name{flex:0 0 140px}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="topbar">
+  <div class="brand"><div class="brand-logo"></div><span class="brand-text">ClickPlus · Estatística</span></div>
+  <div>PBL 3 · Correlação & Regressão Linear</div>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- ============ SLIDE 1 — CAPA ============ -->
+  <section class="slide cover">
+    <span class="glow glow-1"></span>
+    <span class="glow glow-2"></span>
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>PBL 3 · Estatística Descritiva</span>
+      <h1>Estudo de <span class="gradient-text">Correlação</span><br/>e <span class="gradient-text">Regressão Linear</span></h1>
+      <p class="lede">Aplicação de estatística decisória para otimizar o investimento em marketing digital da <b style="color:var(--text)">ClickPlus</b> — e-commerce de eletrônicos — com base em 12 meses de dados reais coletados pela equipe de análise.</p>
+
+      <div class="team">
+        <div class="team-chip"><div class="avatar">AF</div>Arthur Fontinele</div>
+        <div class="team-chip"><div class="avatar">MV</div>Matheus Veras</div>
+        <div class="team-chip"><div class="avatar">PF</div>Pedro Fernando</div>
+        <div class="team-chip"><div class="avatar">LM</div>Luis Mateus</div>
+        <div class="team-chip"><div class="avatar">MA</div>Marco André</div>
+      </div>
+
+      <div class="meta-row">
+        <span><b>Disciplina</b> · Estatística Descritiva</span>
+        <span><b>Modalidade</b> · PBL — Aprendizagem Baseada em Problemas</span>
+        <span><b>Ano</b> · 2026</span>
+      </div>
+
+      <div style="margin-top:50px;color:var(--text-dim);font-size:12px">
+        Use <span class="kbd">←</span> <span class="kbd">→</span> para navegar · <span class="kbd">F</span> para fullscreen
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2 — CONTEXTO ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>1 · Contexto</span>
+      <h2 style="margin:18px 0 30px">A era da <span class="gradient-text">decisão baseada em dados</span></h2>
+      <p style="font-size:1.05rem;max-width:920px;margin-bottom:28px">No cenário atual de transformação digital e alta competitividade, empresas precisam tomar decisões precisas e ágeis para otimizar recursos e maximizar resultados. A <b style="color:var(--text)">análise de dados</b> tornou-se ferramenta estratégica para identificar padrões, antecipar tendências e fundamentar ações com evidências.</p>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg></div>
+          <h3>Medir relações</h3>
+          <p style="font-size:14px;margin-top:6px">Entre variáveis estratégicas — investimento em marketing × vendas, p. ex.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/></svg></div>
+          <h3>Prever comportamento</h3>
+          <p style="font-size:14px;margin-top:6px">Antecipar a demanda do mercado a partir de modelos preditivos.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg></div>
+          <h3>Otimizar recursos</h3>
+          <p style="font-size:14px;margin-top:6px">Ajuste de orçamento e priorização de campanhas com maior retorno.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:28px;font-size:14px">Empresas como <b style="color:var(--text)">Amazon</b>, <b style="color:var(--text)">Netflix</b> e grandes varejistas digitais já aplicam essas técnicas para personalizar estratégias, reduzir custos e ganhar eficiência. Mas a barreira está caindo — negócios de médio porte podem (e devem) usá-las para competir.</p>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 3 — CLICKPLUS ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>2 · A empresa</span>
+      <h2 style="margin:18px 0 10px">Conheça a <span class="gradient-text">ClickPlus</span></h2>
+      <p style="margin-bottom:28px">E-commerce fundado em <b style="color:var(--text)">2018</b>, especializado em produtos eletrônicos — smartphones, notebooks, acessórios e gadgets — oferecendo tecnologia de qualidade com preços competitivos e experiência de compra eficiente.</p>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <span class="pill pill-violet">Segmento</span>
+          <h3 style="margin:12px 0 6px">B2C · Varejo digital</h3>
+          <p style="font-size:14px">Eletrônicos portáteis, dispositivos inteligentes e acessórios.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-cyan">Marketing</span>
+          <h3 style="margin:12px 0 6px">Mídia paga + sazonalidade</h3>
+          <p style="font-size:14px">Google Ads, Meta Ads, influenciadores · campanhas Black Friday e Natal.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-amber">Métricas-chave</span>
+          <h3 style="margin:12px 0 6px">Cliques · Conversão · ROI</h3>
+          <p style="font-size:14px">Foco em retorno sobre investimento e funil de aquisição digital.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-emerald">Infraestrutura</span>
+          <h3 style="margin:12px 0 6px">Plataforma própria</h3>
+          <p style="font-size:14px">Site responsivo · logística terceirizada via transportadoras.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-rose">Desafios</span>
+          <h3 style="margin:12px 0 6px">Concorrência intensa</h3>
+          <p style="font-size:14px">Necessidade urgente de otimizar verba de marketing e proteger margens.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-violet">Período analisado</span>
+          <h3 style="margin:12px 0 6px">12 meses</h3>
+          <p style="font-size:14px">Dados consolidados pela equipe de análise da empresa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4 — PROBLEMA ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>3 · O Problema</span>
+      <h2 style="margin:18px 0 26px">Pergunta-problema</h2>
+
+      <div style="padding:36px;border-radius:20px;background:linear-gradient(135deg,rgba(124,58,237,0.14),rgba(6,182,212,0.10));border:1px solid rgba(168,85,247,0.30);margin-bottom:28px">
+        <p style="font-size:1.45rem;line-height:1.5;color:var(--text);font-family:'Space Grotesk';font-weight:500">
+          “Como a <b class="gradient-text">ClickPlus</b> pode otimizar seu investimento em marketing digital para maximizar as vendas, utilizando análise de <b class="gradient-text">correlação</b> e <b class="gradient-text">regressão linear</b>?”
+        </p>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 style="margin-bottom:12px">Variáveis monitoradas</h3>
+          <ul class="checklist">
+            <li><span class="check">$</span><span><b>Investimento em Marketing (R$ mil)</b> — verba gasta em anúncios digitais.</span></li>
+            <li><span class="check">▲</span><span><b>Cliques no Site (mil)</b> — visitantes que clicaram nos anúncios.</span></li>
+            <li><span class="check">%</span><span><b>Taxa de Conversão (%)</b> — porcentagem de cliques que viraram vendas.</span></li>
+            <li><span class="check">★</span><span><b>Vendas Mensais (R$ mil)</b> — receita total gerada.</span></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:12px">Objetivos do estudo</h3>
+          <ul class="checklist">
+            <li><span class="check">1</span><span>Organizar e manipular os dados coletados.</span></li>
+            <li><span class="check">2</span><span>Identificar relações entre as variáveis.</span></li>
+            <li><span class="check">3</span><span>Criar modelos preditivos simples.</span></li>
+            <li><span class="check">4</span><span>Discutir limitações (correlação ≠ causalidade).</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5 — DADOS ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>4 · Dados</span>
+      <h2 style="margin:18px 0 8px">Dados <span class="gradient-text">completos</span> · 12 meses</h2>
+      <p style="margin-bottom:22px">Cada linha é um mês de operação da ClickPlus. <span class="pill pill-violet" style="margin-left:8px">n = 12</span></p>
+
+      <div class="card" style="padding:6px">
+        <div style="overflow:auto;max-height:55vh">
+          <table>
+            <thead>
+              <tr>
+                <th>Mês</th><th>Investimento (R$ mil)</th><th>Cliques (mil)</th><th>Conversão (%)</th><th>Vendas (R$ mil)</th>
+              </tr>
+            </thead>
+            <tbody id="data-table"></tbody>
+            <tfoot>
+              <tr style="background:var(--glass-2)">
+                <th>Σ Total</th><td><b>157</b></td><td><b>80,9</b></td><td><b>107,0</b></td><td><b>717</b></td>
+              </tr>
+              <tr>
+                <th>x̄ Média</th><td><b>13,08</b></td><td><b>6,74</b></td><td><b>8,92</b></td><td><b>59,75</b></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6 — DESCRITIVA ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>5 · Estatística descritiva</span>
+      <h2 style="margin:18px 0 26px">Resumo <span class="gradient-text">numérico</span> das variáveis</h2>
+
+      <div class="grid grid-4">
+        <div class="card">
+          <span class="pill pill-violet">Investimento (R$ mil)</span>
+          <div class="stat" style="margin-top:14px"><span class="stat-label">Média</span><span class="stat-value">13,08</span></div>
+          <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--text-dim)">
+            <span>Mediana <b style="color:var(--text)">13,00</b></span><span>σ <b style="color:var(--text)">5,40</b></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:var(--text-dim)">
+            <span>Mín <b style="color:var(--text)">5</b></span><span>Máx <b style="color:var(--text)">22</b></span>
+          </div>
+        </div>
+        <div class="card">
+          <span class="pill pill-cyan">Cliques (mil)</span>
+          <div class="stat" style="margin-top:14px"><span class="stat-label">Média</span><span class="stat-value">6,74</span></div>
+          <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--text-dim)">
+            <span>Mediana <b style="color:var(--text)">6,80</b></span><span>σ <b style="color:var(--text)">2,39</b></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:var(--text-dim)">
+            <span>Mín <b style="color:var(--text)">3,2</b></span><span>Máx <b style="color:var(--text)">10,5</b></span>
+          </div>
+        </div>
+        <div class="card">
+          <span class="pill pill-amber">Conversão (%)</span>
+          <div class="stat" style="margin-top:14px"><span class="stat-label">Média</span><span class="stat-value">8,92</span></div>
+          <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--text-dim)">
+            <span>Mediana <b style="color:var(--text)">9,10</b></span><span>σ <b style="color:var(--text)">1,39</b></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:var(--text-dim)">
+            <span>Mín <b style="color:var(--text)">6,5</b></span><span>Máx <b style="color:var(--text)">11,0</b></span>
+          </div>
+        </div>
+        <div class="card">
+          <span class="pill pill-emerald">Vendas (R$ mil)</span>
+          <div class="stat" style="margin-top:14px"><span class="stat-label">Média</span><span class="stat-value">59,75</span></div>
+          <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--text-dim)">
+            <span>Mediana <b style="color:var(--text)">61,50</b></span><span>σ <b style="color:var(--text)">21,52</b></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:var(--text-dim)">
+            <span>Mín <b style="color:var(--text)">28</b></span><span>Máx <b style="color:var(--text)">95</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="key-insight" style="margin-top:24px">
+        <div class="ki-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg></div>
+        <div><h4>Observação</h4><p>O coeficiente de variação das vendas (σ/x̄ ≈ 36%) é alto — indício de forte heterogeneidade mensal, justamente o que queremos explicar com as variáveis preditoras.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 7 — CORRELAÇÃO ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>6 · Correlação</span>
+      <h2 style="margin:18px 0 8px">Coeficiente de Pearson (<i>r</i>) com Vendas</h2>
+      <p style="margin-bottom:24px">Quanto mais próximo de <b style="color:var(--text)">+1</b>, mais forte a relação linear positiva.</p>
+
+      <div class="card">
+        <div class="corr-row">
+          <div class="corr-name">Cliques × Vendas</div>
+          <div class="corr-bar"><div class="corr-bar-fill" data-w="99.41" style="width:0%"></div></div>
+          <div class="corr-val">0,9941</div>
+        </div>
+        <div class="corr-row">
+          <div class="corr-name">Investimento × Vendas</div>
+          <div class="corr-bar"><div class="corr-bar-fill" data-w="98.57" style="width:0%"></div></div>
+          <div class="corr-val">0,9857</div>
+        </div>
+        <div class="corr-row">
+          <div class="corr-name">Conversão × Vendas</div>
+          <div class="corr-bar"><div class="corr-bar-fill" data-w="98.49" style="width:0%"></div></div>
+          <div class="corr-val">0,9849</div>
+        </div>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:24px">
+        <div class="key-insight">
+          <div class="ki-icon" style="color:#6ee7b7;background:rgba(16,185,129,.16)">★</div>
+          <div><h4>Vencedor — <b>Cliques</b></h4><p>A variável com correlação mais forte com vendas é o número de cliques (<i>r</i> = 0,9941), seguida muito de perto pelo investimento.</p></div>
+        </div>
+        <div class="key-insight">
+          <div class="ki-icon">!</div>
+          <div><h4>Cuidado com causalidade</h4><p>As três variáveis são altamente correlacionadas entre si — isso é típico de uma cadeia funil: <b>investimento → cliques → vendas</b>.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8 — DISPERSÃO ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>7 · Diagrama de dispersão</span>
+      <h2 style="margin:18px 0 8px">Investimento <span style="color:var(--text-dim)">×</span> Vendas</h2>
+      <p style="margin-bottom:22px">Cada ponto = um mês. A reta verde é o ajuste de mínimos quadrados.</p>
+
+      <div class="grid grid-2" style="grid-template-columns:1.4fr 1fr;align-items:stretch">
+        <div class="chart-wrap" style="height:55vh;min-height:420px">
+          <canvas id="scatter"></canvas>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <span class="pill pill-emerald">Reta de regressão</span>
+            <div class="equation" style="margin-top:14px;font-size:1.4rem">
+              ŷ = 8,37 + 3,93 · x
+            </div>
+          </div>
+          <div class="card" style="display:flex;justify-content:space-between;gap:14px">
+            <div class="stat"><span class="stat-label">Inclinação (β₁)</span><span class="stat-value">3,93</span><span class="stat-sub">R$ mil em vendas / R$ mil investido</span></div>
+            <div class="stat"><span class="stat-label">Intercepto (β₀)</span><span class="stat-value">8,37</span><span class="stat-sub">R$ mil (vendas-base)</span></div>
+          </div>
+          <div class="card">
+            <span class="pill pill-violet">Coeficiente de determinação</span>
+            <div class="stat" style="margin-top:10px"><span class="stat-label">R²</span><span class="stat-value" style="font-size:3rem">0,972</span><span class="stat-sub">≈ 97% da variação das vendas é explicada pelo investimento</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 9 — REGRESSÃO ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>8 · Regressão linear</span>
+      <h2 style="margin:18px 0 26px">O <span class="gradient-text">modelo</span> em detalhe</h2>
+
+      <div class="equation" style="margin-bottom:26px">
+        Vendas = <span class="gradient-text">8,37</span> + <span class="gradient-text">3,93</span> × Investimento &nbsp;<small>(R² = 0,972)</small>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <h3 style="margin-bottom:8px">β₀ — intercepto</h3>
+          <p style="font-size:14px"><b style="color:var(--text)">8,37</b> · vendas estimadas (R$ mil) caso o investimento fosse zero. É a base orgânica.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:8px">β₁ — inclinação</h3>
+          <p style="font-size:14px">Cada <b style="color:var(--text)">+R$ 1.000</b> investidos em marketing → <b style="color:var(--cyan-2)">+R$ 3.927</b> esperados em vendas.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:8px">R² = 0,972</h3>
+          <p style="font-size:14px"><b style="color:var(--text)">97,2%</b> da variação nas vendas é explicada pelo investimento. Modelo extremamente forte.</p>
+        </div>
+      </div>
+
+      <div class="key-insight" style="margin-top:24px">
+        <div class="ki-icon">Σ</div>
+        <div>
+          <h4>Como obtivemos os coeficientes</h4>
+          <p style="font-size:14px">Mínimos quadrados: β₁ = S<sub>xy</sub> / S<sub>xx</sub> = 1260,25 / 320,92 ≈ <b>3,93</b> · β₀ = ȳ − β₁·x̄ = 59,75 − 3,93 · 13,08 ≈ <b>8,37</b>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 10 — PREVISÃO ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>9 · Previsão</span>
+      <h2 style="margin:18px 0 8px">Previsão de <span class="gradient-text">vendas</span> por nível de investimento</h2>
+      <p style="margin-bottom:22px">Aplicando o modelo para diferentes cenários de verba mensal.</p>
+
+      <div class="grid grid-2" style="grid-template-columns:1.2fr 1fr">
+        <div class="chart-wrap" style="height:50vh;min-height:380px">
+          <canvas id="forecast"></canvas>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <span class="pill pill-cyan">Cenário conservador</span>
+            <h3 style="margin:10px 0 4px">R$ 8 mil em marketing</h3>
+            <p style="font-size:14px">Vendas estimadas: <b style="color:var(--cyan-2)">R$ 39,8 mil</b></p>
+          </div>
+          <div class="card">
+            <span class="pill pill-violet">Cenário atual médio</span>
+            <h3 style="margin:10px 0 4px">R$ 13 mil em marketing</h3>
+            <p style="font-size:14px">Vendas estimadas: <b style="color:var(--cyan-2)">R$ 59,5 mil</b></p>
+          </div>
+          <div class="card">
+            <span class="pill pill-amber">Cenário expansivo</span>
+            <h3 style="margin:10px 0 4px">R$ 20 mil em marketing</h3>
+            <p style="font-size:14px">Vendas estimadas: <b style="color:var(--cyan-2)">R$ 86,9 mil</b></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 11 — DECISÃO 1 ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>10 · Tomada de decisão</span>
+      <h2 style="margin:18px 0 8px">Qual <span class="gradient-text">orçamento</span> para vender R$ 80 mil?</h2>
+      <p style="margin-bottom:24px">Invertendo a equação da regressão para isolar o investimento <b style="color:var(--text)">x</b> dado o alvo de vendas <b style="color:var(--text)">ŷ = 80</b>.</p>
+
+      <div class="equation" style="margin-bottom:26px">
+        x = ( ŷ − 8,37 ) / 3,93 &nbsp;⇒&nbsp; x = ( 80 − 8,37 ) / 3,93 ≈ <span class="gradient-text">18,24</span>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card" style="text-align:center">
+          <div class="big-num">R$ 18,2 mil</div>
+          <p style="margin-top:10px;font-size:14px">Investimento mensal recomendado em marketing digital para mirar R$ 80 mil em vendas.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="big-num">~10%</div>
+          <p style="margin-top:10px;font-size:14px">Acima do investimento médio histórico observado (R$ 13 mil/mês) — incremento factível.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="big-num">R$ 4,4×</div>
+          <p style="margin-top:10px;font-size:14px">Multiplicador de retorno: cada R$ 1 investido retorna ≈ R$ 4,40 em receita esperada.</p>
+        </div>
+      </div>
+
+      <div class="key-insight" style="margin-top:24px">
+        <div class="ki-icon">⚠</div>
+        <div><h4>Atenção</h4><p>A previsão é válida dentro do <b>intervalo amostrado</b> (R$ 5 a R$ 22 mil). Extrapolar muito além disso pode ser arriscado — o modelo não “sabe” o que acontece em níveis nunca observados (saturação de canal, fadiga de público, etc.).</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 12 — DECISÃO 2 ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>11 · Tomada de decisão</span>
+      <h2 style="margin:18px 0 8px">Aumentar <span class="gradient-text">cliques</span> ou melhorar <span class="gradient-text">conversão</span>?</h2>
+      <p style="margin-bottom:22px">Comparando o impacto marginal estimado de cada variável sobre as vendas.</p>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <span class="pill pill-cyan">Estratégia A · Cliques</span>
+          <h3 style="margin:12px 0 6px">+1 mil cliques → +R$ 8,9 mil em vendas</h3>
+          <p style="font-size:14px">A variável com a maior correlação com vendas (<i>r</i> = 0,994). Conseguida via aumento de mídia paga e SEO.</p>
+          <ul class="checklist" style="margin-top:14px">
+            <li><span class="check">+</span><span><b>Pró:</b> efeito direto e bem mensurável.</span></li>
+            <li><span class="warn">−</span><span><b>Contra:</b> custo crescente por clique conforme se escala.</span></li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="pill pill-amber">Estratégia B · Conversão</span>
+          <h3 style="margin:12px 0 6px">+1 ponto % conversão → +R$ 15,3 mil em vendas</h3>
+          <p style="font-size:14px">Otimização do funil — UX, checkout, frete, prova social. <i>r</i> = 0,985.</p>
+          <ul class="checklist" style="margin-top:14px">
+            <li><span class="check">+</span><span><b>Pró:</b> alavanca todo o tráfego já pago — multiplicador.</span></li>
+            <li><span class="warn">−</span><span><b>Contra:</b> ganhos têm teto e exigem trabalho de produto.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="key-insight" style="margin-top:24px">
+        <div class="ki-icon" style="color:#6ee7b7;background:rgba(16,185,129,.16)">★</div>
+        <div><h4>Recomendação</h4><p>Adotar uma <b>estratégia híbrida</b>: manter a expansão de cliques (canal já dominado) e <b>investir em CRO</b> (Conversion Rate Optimization), pois cada ponto percentual ganho na conversão vale ~R$ 15 mil — alavancando o tráfego que <i>já</i> está sendo pago.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 13 — LIMITAÇÕES ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>12 · Limitações</span>
+      <h2 style="margin:18px 0 26px">O que o modelo <span class="gradient-text">não diz</span></h2>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <span class="pill pill-rose">Correlação ≠ Causalidade</span>
+          <h3 style="margin:12px 0 6px">Alta correlação não prova causa</h3>
+          <p style="font-size:14px">Investimento e vendas podem ser ambos puxados por uma terceira variável (ex.: sazonalidade). Apenas testes A/B controlados confirmam causa.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-amber">Tamanho da amostra</span>
+          <h3 style="margin:12px 0 6px">n = 12 é pequeno</h3>
+          <p style="font-size:14px">Apenas 12 observações limita a generalização. Coletar mais meses (e dados semanais) aumentaria a confiança estatística.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-violet">Sazonalidade</span>
+          <h3 style="margin:12px 0 6px">Black Friday & Natal</h3>
+          <p style="font-size:14px">O modelo linear não isola eventos sazonais. Uma decomposição temporal (ou variável <i>dummy</i>) seria recomendável.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-cyan">Fatores externos</span>
+          <h3 style="margin:12px 0 6px">Concorrência, economia, mix de produtos</h3>
+          <p style="font-size:14px">Variáveis ausentes podem afetar tanto o investimento quanto as vendas, enviesando os coeficientes.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-emerald">Linearidade assumida</span>
+          <h3 style="margin:12px 0 6px">Retornos podem decrescer</h3>
+          <p style="font-size:14px">Em níveis muito altos de investimento, a relação tende a achatar (saturação). Modelos não-lineares podem ajustar melhor.</p>
+        </div>
+        <div class="card">
+          <span class="pill pill-rose">Multicolinearidade</span>
+          <h3 style="margin:12px 0 6px">As três variáveis se "explicam"</h3>
+          <p style="font-size:14px">Investimento, cliques e conversão são interdependentes (cadeia de funil). Em regressão múltipla isso inflaria o erro padrão dos coeficientes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 14 — CONCLUSÕES ============ -->
+  <section class="slide">
+    <div class="slide-inner stagger">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>13 · Conclusões</span>
+      <h2 style="margin:18px 0 26px">O que <span class="gradient-text">aprendemos</span></h2>
+
+      <div class="grid grid-2">
+        <div class="conc">
+          <h4><span class="num">1</span>Forte relação linear</h4>
+          <p>As três variáveis preditoras apresentam correlação acima de <b>0,98</b> com as vendas — relação quase perfeitamente linear.</p>
+        </div>
+        <div class="conc">
+          <h4><span class="num">2</span>Modelo confiável</h4>
+          <p>A regressão simples Vendas ~ Investimento atinge <b>R² = 0,972</b>, explicando ~97% da variação observada nos 12 meses.</p>
+        </div>
+        <div class="conc">
+          <h4><span class="num">3</span>ROI projetado de ~3,9x</h4>
+          <p>Cada R$ 1 mil adicional investido em marketing está associado a R$ 3,93 mil em vendas esperadas.</p>
+        </div>
+        <div class="conc">
+          <h4><span class="num">4</span>Meta de R$ 80 mil é viável</h4>
+          <p>Recomenda-se um investimento mensal próximo de <b>R$ 18,2 mil</b> — pouco acima do orçamento médio histórico.</p>
+        </div>
+        <div class="conc">
+          <h4><span class="num">5</span>Otimizar conversão tem alto retorno</h4>
+          <p>Cada ponto percentual extra na conversão vale <b>~R$ 15 mil</b> em vendas, alavancando o tráfego já pago.</p>
+        </div>
+        <div class="conc">
+          <h4><span class="num">6</span>Tratar limitações</h4>
+          <p>Aumentar a amostra, controlar sazonalidade e validar causalidade com testes A/B antes de decisões estratégicas grandes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 15 — ENCERRAMENTO ============ -->
+  <section class="slide">
+    <span class="glow glow-1"></span>
+    <span class="glow glow-2"></span>
+    <div class="slide-inner stagger" style="text-align:center">
+      <span class="eyebrow" style="margin:0 auto"><span class="eyebrow-dot"></span>14 · Encerramento</span>
+      <h1 style="margin:24px 0 10px">Obrigado!</h1>
+      <p style="margin:0 auto 36px;max-width:680px;font-size:1.1rem">Esperamos que esta análise contribua para decisões mais embasadas e ajude a ClickPlus a transformar dados em crescimento.</p>
+
+      <div class="end-card">
+        <span class="pill pill-violet" style="margin-bottom:18px">Equipe</span>
+        <div class="grid grid-5" style="gap:12px;margin:14px 0 26px">
+          <div class="team-chip" style="justify-content:center"><div class="avatar">AF</div>Arthur Fontinele</div>
+          <div class="team-chip" style="justify-content:center"><div class="avatar">MV</div>Matheus Veras</div>
+          <div class="team-chip" style="justify-content:center"><div class="avatar">PF</div>Pedro Fernando</div>
+          <div class="team-chip" style="justify-content:center"><div class="avatar">LM</div>Luis Mateus</div>
+          <div class="team-chip" style="justify-content:center"><div class="avatar">MA</div>Marco André</div>
+        </div>
+
+        <h3 style="margin-bottom:14px">Bibliografia</h3>
+        <div style="text-align:left;max-width:760px;margin:0 auto;font-size:14px;color:var(--text-dim);line-height:1.9">
+          <div>BUSSAB, W. de O.; MORETTIN, P. A. <b style="color:var(--text)">Estatística Básica</b>. 6ª ed. São Paulo: Saraiva, 2010.</div>
+          <div>DOWNING, D.; CLARK, J. <b style="color:var(--text)">Estatística Aplicada</b>. São Paulo: Saraiva, 1999.</div>
+          <div>LEVINE, D. M. et al. <b style="color:var(--text)">Estatística — Teoria e Aplicações</b>. Rio de Janeiro: LTC, 2000.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="anterior"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg></button>
+  <div class="dots" id="dots"></div>
+  <span class="nav-counter"><b id="cur">1</b> / <span id="tot">15</span></span>
+  <button id="next" aria-label="próximo"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></button>
+  <button id="full" aria-label="fullscreen" title="Fullscreen (F)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg></button>
+</div>
+
+<div class="footer-ribbon"><span><b>PBL 3</b> · Estatística Descritiva</span><span>·</span><span>ClickPlus · Correlação & Regressão Linear</span><span>·</span><span>Equipe: Arthur · Matheus · Pedro · Luis · Marco</span></div>
+
+<script>
+/* ====== Dados ====== */
+const data = [
+  {m:1, inv:10, c:5.2, conv:8.1, v:42},
+  {m:2, inv:15, c:7.1, conv:9.3, v:65},
+  {m:3, inv:8,  c:4.0, conv:7.8, v:38},
+  {m:4, inv:12, c:6.5, conv:8.9, v:58},
+  {m:5, inv:18, c:8.7, conv:10.2, v:76},
+  {m:6, inv:5,  c:3.2, conv:6.5, v:28},
+  {m:7, inv:20, c:9.9, conv:10.5, v:88},
+  {m:8, inv:14, c:7.8, conv:9.7, v:72},
+  {m:9, inv:6,  c:3.8, conv:7.0, v:35},
+  {m:10, inv:16, c:8.2, conv:9.5, v:70},
+  {m:11, inv:11, c:6.0, conv:8.5, v:50},
+  {m:12, inv:22, c:10.5, conv:11.0, v:95},
+];
+const fmt = (n,d=2)=>n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* Render data table */
+const tbody = document.getElementById('data-table');
+data.forEach(r=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><b>${r.m}</b></td><td>${fmt(r.inv,0)}</td><td>${fmt(r.c,1)}</td><td>${fmt(r.conv,1)}</td><td><b>${fmt(r.v,0)}</b></td>`;
+  tbody.appendChild(tr);
+});
+
+/* ====== Navegação ====== */
+const slides = [...document.querySelectorAll('.slide')];
+const dotsEl = document.getElementById('dots');
+const totEl = document.getElementById('tot');
+const curEl = document.getElementById('cur');
+const progress = document.getElementById('progress');
+let idx = 0;
+totEl.textContent = slides.length;
+slides.forEach((_,i)=>{
+  const d = document.createElement('span');
+  d.className='dot'; if(i===0) d.classList.add('active');
+  d.addEventListener('click',()=>go(i));
+  dotsEl.appendChild(d);
+});
+const dots = [...document.querySelectorAll('.dot')];
+
+function go(i){
+  if(i<0||i>=slides.length) return;
+  slides.forEach((s,k)=>{
+    s.classList.toggle('active', k===i);
+    s.classList.toggle('prev', k<i);
+  });
+  dots.forEach((d,k)=>d.classList.toggle('active',k===i));
+  curEl.textContent = i+1;
+  progress.style.width = ((i+1)/slides.length*100)+'%';
+  idx = i;
+  triggerInSlide(i);
+}
+document.getElementById('prev').onclick = ()=>go(idx-1);
+document.getElementById('next').onclick = ()=>go(idx+1);
+document.getElementById('full').onclick = toggleFs;
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ') {e.preventDefault(); go(idx+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp') {e.preventDefault(); go(idx-1);}
+  else if(e.key==='Home'){e.preventDefault();go(0);}
+  else if(e.key==='End'){e.preventDefault();go(slides.length-1);}
+  else if(e.key==='f'||e.key==='F') toggleFs();
+});
+function toggleFs(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+
+/* trigger animations for charts/bars when slide enters */
+let scatterChart=null, forecastChart=null;
+function triggerInSlide(i){
+  // Correlation bars (slide 7 — index 6)
+  if(i===6){
+    requestAnimationFrame(()=>{
+      document.querySelectorAll('#deck .slide')[6].querySelectorAll('.corr-bar-fill').forEach(b=>{
+        b.style.width = b.dataset.w + '%';
+      });
+    });
+  }
+  // Scatter chart (slide 8 — index 7)
+  if(i===7 && !scatterChart){
+    const ctx = document.getElementById('scatter').getContext('2d');
+    const points = data.map(d=>({x:d.inv,y:d.v}));
+    const line = [{x:4,y:8.37+3.93*4},{x:23,y:8.37+3.93*23}];
+    scatterChart = new Chart(ctx,{
+      type:'scatter',
+      data:{datasets:[
+        {label:'Meses observados',data:points,backgroundColor:'rgba(34,211,238,0.85)',borderColor:'#22d3ee',pointRadius:7,pointHoverRadius:10,pointBorderColor:'#fff',pointBorderWidth:1.5},
+        {label:'ŷ = 8,37 + 3,93·x',data:line,type:'line',showLine:true,borderColor:'#10b981',backgroundColor:'#10b981',borderWidth:3,pointRadius:0,fill:false,borderDash:[6,5]}
+      ]},
+      options:chartOpts({xTitle:'Investimento (R$ mil)', yTitle:'Vendas (R$ mil)'})
+    });
+  }
+  // Forecast bar chart (slide 10 — index 9)
+  if(i===9 && !forecastChart){
+    const xs = [5,8,11,13,15,18,20,22];
+    const ys = xs.map(x=>+(8.37+3.93*x).toFixed(1));
+    const ctx = document.getElementById('forecast').getContext('2d');
+    forecastChart = new Chart(ctx,{
+      type:'bar',
+      data:{labels:xs.map(v=>'R$ '+v+'k'),datasets:[{
+        label:'Vendas previstas (R$ mil)',
+        data:ys,
+        backgroundColor:(c)=>{
+          const grad=c.chart.ctx.createLinearGradient(0,0,0,c.chart.height);
+          grad.addColorStop(0,'rgba(168,85,247,0.85)'); grad.addColorStop(1,'rgba(34,211,238,0.55)');
+          return grad;
+        },
+        borderRadius:8,borderSkipped:false,
+      }]},
+      options:chartOpts({xTitle:'Investimento mensal', yTitle:'Vendas previstas (R$ mil)', leg:false})
+    });
+  }
+}
+
+function chartOpts({xTitle,yTitle,leg=true}){
+  return {
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:1100,easing:'easeOutCubic'},
+    plugins:{
+      legend:{display:leg, position:'top', labels:{color:'#cbd5e1',usePointStyle:true,boxWidth:8,font:{family:'Inter',size:12}}},
+      tooltip:{
+        backgroundColor:'rgba(10,10,28,0.95)', borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+        titleColor:'#fff',bodyColor:'#cbd5e1',padding:10,cornerRadius:10,
+      }
+    },
+    scales:{
+      x:{
+        title:{display:true,text:xTitle,color:'#94a3b8',font:{family:'Space Grotesk',size:13,weight:'600'}},
+        ticks:{color:'#94a3b8',font:{family:'Inter'}},
+        grid:{color:'rgba(255,255,255,0.05)'},
+      },
+      y:{
+        title:{display:true,text:yTitle,color:'#94a3b8',font:{family:'Space Grotesk',size:13,weight:'600'}},
+        ticks:{color:'#94a3b8',font:{family:'Inter'}},
+        grid:{color:'rgba(255,255,255,0.06)'},
+      }
+    }
+  };
+}
+
+/* init */
+go(0);
+</script>
+</body>
+</html>
