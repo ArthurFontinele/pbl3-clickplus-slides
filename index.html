@@ -1292,6 +1292,10 @@ function initLab(){
 
   function updateLab(){
     labStats = calcStats(labPoints);
+    // Reta: verde quando r >= 0, vermelha quando r < 0
+    const lineColor = labStats.r >= 0 ? '#10b981' : '#fb7185';
+    labChart.data.datasets[1].borderColor = lineColor;
+    labChart.data.datasets[1].backgroundColor = lineColor;
     labChart.data.datasets[1].data = [
       {x:X_MIN, y:labStats.b0 + labStats.b1*X_MIN},
       {x:X_MAX, y:labStats.b0 + labStats.b1*X_MAX}
@@ -1306,8 +1310,12 @@ function initLab(){
     document.getElementById('lab-r').textContent  = fmt(labStats.r,4);
     document.getElementById('lab-r2').textContent = fmt(labStats.r2,4);
     const sign = labStats.b1 >= 0 ? '+' : '−';
-    document.getElementById('lab-eq').innerHTML =
-      `ŷ = ${fmt(labStats.b0,2)} ${sign} ${fmt(Math.abs(labStats.b1),2)} · x`;
+    const eq = document.getElementById('lab-eq');
+    eq.innerHTML = `ŷ = ${fmt(labStats.b0,2)} ${sign} ${fmt(Math.abs(labStats.b1),2)} · x`;
+    if(Math.abs(prevStats.b0 - labStats.b0) > 1e-4 || Math.abs(prevStats.b1 - labStats.b1) > 1e-4){
+      eq.classList.add('flash');
+      clearTimeout(eq._t); eq._t = setTimeout(()=>eq.classList.remove('flash'), 380);
+    }
     prevStats = {...labStats};
   }
 
